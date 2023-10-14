@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import "./App.css";
 
 const cellSize = 20;
 const numRows = 20;
@@ -7,7 +8,8 @@ const numCols = 20;
 const canvasWidth = cellSize * numCols;
 const canvasHeight = cellSize * numRows;
 
-const colorPresets = ["black", "red", "blue"];
+const colorPresets = ["#FAC3C1", "#FD0035", "#2C2C2C"];
+const backgroundColor = "#E8E5E3";
 
 const PixelPainter: React.FC = () => {
   const [selectedColor, setSelectedColor] = useState(colorPresets[0]);
@@ -20,7 +22,7 @@ const PixelPainter: React.FC = () => {
     const context = canvas.getContext("2d");
     if (!context) return;
 
-    context.fillStyle = "white";
+    context.fillStyle = backgroundColor;
     context.fillRect(0, 0, canvas.width, canvas.height);
 
     context.strokeStyle = "gray";
@@ -83,25 +85,61 @@ const PixelPainter: React.FC = () => {
     context.fillRect(x, y, cellSize, cellSize);
   };
 
+  const clearGrid = () => {
+    const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+    if (!canvas) return;
+
+    const context = canvas.getContext("2d");
+    if (!context) return;
+
+    context.fillStyle = backgroundColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Redraw the grid lines
+    context.strokeStyle = "gray";
+    context.lineWidth = 1;
+    for (let row = 1; row < numRows; row++) {
+      const y = row * cellSize;
+      context.beginPath();
+      context.moveTo(0, y);
+      context.lineTo(canvasWidth, y);
+      context.stroke();
+    }
+    for (let col = 1; col < numCols; col++) {
+      const x = col * cellSize;
+      context.beginPath();
+      context.moveTo(x, 0);
+      context.lineTo(x, canvasHeight);
+      context.stroke();
+    }
+  };
+
   return (
     <div>
-      <h1>Pixel Painter</h1>
       <div>
-        {colorPresets.map((presetColor, index) => (
+        <div>
           <motion.button
-            key={index}
-            style={{
-              backgroundColor: presetColor,
-              width: "30px",
-              height: "30px",
-              margin: "5px",
-              border:
-                presetColor === selectedColor ? "2px solid white" : "none",
-            }}
-            onClick={() => setSelectedColor(presetColor)}
-            whileHover={{ scale: 1.2 }}
+            className={`pixel-button red-button ${
+              selectedColor === "#FD0035" ? "selected-button" : ""
+            }`}
+            onClick={() => setSelectedColor("#FD0035")}
+            whileHover={{ scale: 1.1 }}
           ></motion.button>
-        ))}
+          <motion.button
+            className={`pixel-button blue-button ${
+              selectedColor === "#2C2C2C" ? "selected-button" : ""
+            }`}
+            onClick={() => setSelectedColor("#2C2C2C")}
+            whileHover={{ scale: 1.1 }}
+          ></motion.button>
+          <motion.button
+            className={`pixel-button black-button ${
+              selectedColor === "#FAC3C1" ? "selected-button" : ""
+            }`}
+            onClick={() => setSelectedColor("#FAC3C1")}
+            whileHover={{ scale: 1.1 }}
+          ></motion.button>
+        </div>
       </div>
       <motion.canvas
         id="canvas"
@@ -113,7 +151,13 @@ const PixelPainter: React.FC = () => {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
+        style={{ touchAction: "none" }} // Add this line
       ></motion.canvas>
+      <div>
+        <button className="clear-button" onClick={clearGrid}>
+          Clear Grid
+        </button>
+      </div>
     </div>
   );
 };
